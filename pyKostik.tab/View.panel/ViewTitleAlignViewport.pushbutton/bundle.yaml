@@ -1,0 +1,10 @@
+title: |-
+  View Title
+  Align with Viewport
+
+tooltip: |-
+  Aligns View Titles with their Viewports
+  and adjusts View Title line lengths to text.
+
+min_revit_version: 2022
+context: active-sheet

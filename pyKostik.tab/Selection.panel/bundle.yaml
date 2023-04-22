@@ -1,0 +1,5 @@
+layout:
+  - Select
+  - ZoomToSelection
+  - CopyIdOfSelection
+  - framing

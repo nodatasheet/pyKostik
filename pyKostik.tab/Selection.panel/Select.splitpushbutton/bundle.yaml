@@ -1,0 +1,6 @@
+layout:
+  - SelectAllInView
+  - GroupSelectMembers
+  - AssemblySelectMembers
+  - BeamSystemGetBeams
+  - BeamGetBeamSystem

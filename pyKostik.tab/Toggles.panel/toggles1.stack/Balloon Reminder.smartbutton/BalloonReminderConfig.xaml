@@ -1,0 +1,62 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" 
+        WindowStartupLocation="CenterScreen"
+        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+        HorizontalContentAlignment="Center"
+        ResizeMode="NoResize"
+        Title="Balloon Reminder Options" SizeToContent="WidthAndHeight" UseLayoutRounding="True">
+    <Window.Resources>
+        <Thickness x:Key="tbMargin">0,5,0,0</Thickness>
+    </Window.Resources>
+    <DockPanel Margin="10" HorizontalAlignment="Stretch">
+        <StackPanel>
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type CheckBox}">
+                    <Setter Property="Margin" Value="{StaticResource tbMargin}"/>
+                </Style>
+            </StackPanel.Resources>
+            <TextBlock Text="Synchronization settings" FontWeight="Bold"/>
+            <TextBlock Margin="0,0,0,10">
+                    Settings used when clicking "Synchronize now" in balloon tip
+            </TextBlock>
+            <CheckBox x:Name="compact_central" IsChecked="True" Margin="0,2,0,2">Compact Central Model (slow)</CheckBox>
+            <GroupBox Header="After synchronizing, relinquish following worksets and elements">
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,5,5,0">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type CheckBox}">
+                                <Setter Property="Margin" Value="{StaticResource tbMargin}"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <CheckBox x:Name="relinq_proj_standards" IsChecked="True">Project Standard Worksets</CheckBox>
+                        <CheckBox x:Name="relinq_families" IsChecked="True">Family Worksets</CheckBox>
+                        <CheckBox x:Name="relinq_borrowed" IsChecked="True">Borrowed Elements</CheckBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="1" Margin="5,5,0,0">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type CheckBox}">
+                                <Setter Property="Margin" Value="{StaticResource tbMargin}"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <CheckBox x:Name="relinq_views" IsChecked="True">View Worksets</CheckBox>
+                        <CheckBox x:Name="relinq_user_created" IsChecked="True">User-created Worksets</CheckBox>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+            <DockPanel Margin="1,10,1,0">
+                <TextBlock Text="Sync comment"/>
+                <TextBox x:Name="sync_comment"
+                             KeyDown="sync_comment_keydown"
+                             Text="{Binding ElementName=crop_offset, Mode=OneWay}"
+                             Margin="5,0,0,0"/>
+            </DockPanel>
+            <CheckBox x:Name="save_local" IsChecked="True">Save Local File before and after synchronizing with central</CheckBox>
+            <Button Margin="0,10,0,0" Click="save_options" Content="Save Options" Height="24"/>
+        </StackPanel>
+    </DockPanel>
+</Window>

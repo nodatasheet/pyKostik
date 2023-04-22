@@ -1,0 +1,10 @@
+title: Create Legend Components
+tooltip: |
+  Creates Legend Components from selected Elements.
+
+  There should be a Legend view with at least one Legend Component in it!
+
+  Shift-Click:
+  Shows Options Window
+author: Konstantin (github.com/nodatasheet)
+help_url: https://github.com/nodatasheet
