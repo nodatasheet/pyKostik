@@ -1,0 +1,9 @@
+title: Balloon Reminder
+tooltip: |
+  Replaces standard Saving and Synchronization reminder
+  by less annoying balloon tip
+
+  Shift-Click:
+  Shows Options window
+
+author: Konstantin (github.com/nodatasheet)

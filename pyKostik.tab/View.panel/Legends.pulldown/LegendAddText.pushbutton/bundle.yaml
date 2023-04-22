@@ -1,0 +1,10 @@
+title: Add Text to Legend Components
+tooltip: |
+  Adds a Text annotation under the Legend Components.
+
+  Text will contain the value of picked Parameter.
+
+  Shift-Click:
+  Shows Options Window
+author: Konstantin (github.com/nodatasheet)
+help_url: https://github.com/nodatasheet

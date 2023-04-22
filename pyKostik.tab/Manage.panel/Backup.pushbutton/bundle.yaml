@@ -1,0 +1,5 @@
+title: Backup
+tooltip: Saves and zips active document file to specified folder.
+          Workshared local document will be synchronized
+          and its central file will be zipped.
+          Optionally can pack files linked to the document.

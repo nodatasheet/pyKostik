@@ -1,0 +1,3 @@
+title: Open Doc Folder
+tooltip: Opens the folder containing active document.
+  If document is workshared, opens central model.

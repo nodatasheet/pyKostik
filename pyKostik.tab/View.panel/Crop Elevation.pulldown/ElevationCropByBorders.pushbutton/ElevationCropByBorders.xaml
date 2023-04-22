@@ -1,0 +1,58 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" 
+        WindowStartupLocation="CenterScreen"
+        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+        HorizontalContentAlignment="Center"
+        ResizeMode="NoResize"
+        Title="Crop Options" SizeToContent="WidthAndHeight" UseLayoutRounding="True">
+    <DockPanel Margin="10" HorizontalAlignment="Stretch">
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Margin="0,0,5,0" Grid.Column="0" Click="check_all" Content="Check All" Height="24"/>
+                <Button Margin="5,0,0,0" Grid.Column="1" Click="check_none" Content="Check None" Height="24"/>
+            </Grid>
+            <Button Margin="0,5,0,0" Click="save_options" Content="Save Options" Height="24"/>
+        </StackPanel>
+        <DockPanel>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,10">
+                    Select Categories of Elements which borders will define Crop Region.<LineBreak />
+                    Only Elements cut by View plane will be used.
+                </TextBlock>
+                <Grid Margin="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <GroupBox Header="Vertical" Grid.Column="0" Grid.Row="1" Margin="0,0,5,0">
+                            <StackPanel Margin="5">
+                                <CheckBox x:Name="walls" IsChecked="True">Walls</CheckBox>
+                                <CheckBox x:Name="grids" IsChecked="True">Grids</CheckBox>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Horizontal" Grid.Column="1" Grid.Row="1" Margin="5,0,0,0">
+                            <StackPanel Margin="5">
+                                <CheckBox x:Name="ceilings" IsChecked="True">Ceiling</CheckBox>
+                                <CheckBox x:Name="floors" IsChecked="True">Floor</CheckBox>
+                                <CheckBox x:Name="levels" IsChecked="True">Levels</CheckBox>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+
+                <DockPanel Margin="1,10,1,0">
+                    <TextBlock Text="Border Offset"/>
+                    <TextBox x:Name="crop_offset"
+                             KeyDown="crop_offset_keydown"
+                             PreviewTextInput="crop_offset_preview"
+                             Text="{Binding ElementName=crop_offset, Mode=OneWay}"
+                             Margin="5,0,0,0"/>
+                </DockPanel>
+            </StackPanel>
+        </DockPanel>
+    </DockPanel>
+</Window>
