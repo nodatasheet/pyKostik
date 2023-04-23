@@ -1,14 +1,13 @@
 """Selects all elements in current view"""
 
-from pyrevit import revit, DB, forms, script
-from System.Collections.Generic import List
+from pyrevit import DB, forms, framework, script, revit
 
 doc = revit.doc
 view = doc.ActiveView
 view_id = view.Id
 
-MAX_APPLICABLE_ELEM_QTY = 10
-CAM_AND_BOX_CATS = List[DB.BuiltInCategory](
+MAX_RECOMMENDED_ELEM_QTY = 10000
+CAM_AND_BOX_CATS = framework.List[DB.BuiltInCategory](
     [DB.BuiltInCategory.OST_Cameras,
      DB.BuiltInCategory.OST_SectionBox])
 
@@ -21,26 +20,25 @@ elems_in_view = list(
     .WhereElementIsNotElementType()
 )
 
-if len(elems_in_view) > MAX_APPLICABLE_ELEM_QTY:
+elems_qty = len(elems_in_view)
+if elems_qty > MAX_RECOMMENDED_ELEM_QTY:
     many_elems_msg = (
-        'Current view has {} elements. '
-        'Which can take too long time or fail to select. \n\n'
+        'Current view contains {} elements. \n'
+        'It can take too long time or fail to select them all. \n\n'
         'Are you sure you want to proceed?'
-    ).format(MAX_APPLICABLE_ELEM_QTY)
+    ).format(elems_qty)
 
     warn_too_many_elems = forms.alert(msg=many_elems_msg, yes=True, no=True)
     if not warn_too_many_elems:
         script.exit()
 
 if doc.IsFamilyDocument is True:
-    to_select = elems_in_view.ToElementIds()
+    to_select = elems_in_view
 
 else:
     to_select = []
     for elem in elems_in_view:
-        if hasattr(elem, 'Name') and elem.Name == "ExtentElem":
-            pass
-        else:
+        if not (hasattr(elem, 'Name') and elem.Name == "ExtentElem"):
             to_select.append(elem.Id)
 
     if view.ViewType == DB.ViewType.ThreeD:
