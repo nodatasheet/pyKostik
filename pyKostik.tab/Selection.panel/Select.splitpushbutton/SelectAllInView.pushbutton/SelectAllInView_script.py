@@ -1,12 +1,13 @@
 """Selects all elements in current view"""
 
-from pyrevit import revit, DB
+from pyrevit import revit, DB, forms, script
 from System.Collections.Generic import List
 
 doc = revit.doc
 view = doc.ActiveView
 view_id = view.Id
 
+MAX_APPLICABLE_ELEM_QTY = 1
 CAM_AND_BOX_CATS = List[DB.BuiltInCategory](
     [DB.BuiltInCategory.OST_Cameras,
      DB.BuiltInCategory.OST_SectionBox])
@@ -17,6 +18,17 @@ non_cam_and_box_filter = DB.ElementMulticategoryFilter(CAM_AND_BOX_CATS, True)
 collector = DB.FilteredElementCollector(doc, view_id)\
     .WherePasses(non_cam_and_box_filter)\
     .WhereElementIsNotElementType()
+
+if collector.GetElementCount() > MAX_APPLICABLE_ELEM_QTY:
+    many_elems_msg = (
+        'Current view has more than {} geometry objects. '
+        'Which can take too long time and finally fail to select. \n\n'
+        'Are you sure you want to proceed?'
+    ).format(MAX_APPLICABLE_ELEM_QTY)
+
+    warn_too_many_elems = forms.alert(msg=many_elems_msg, yes=True, no=True)
+    if not warn_too_many_elems:
+        script.exit()
 
 if doc.IsFamilyDocument is True:
     to_select = collector.ToElementIds()
