@@ -7,7 +7,7 @@ doc = revit.doc
 view = doc.ActiveView
 view_id = view.Id
 
-MAX_APPLICABLE_ELEM_QTY = 1
+MAX_APPLICABLE_ELEM_QTY = 10
 CAM_AND_BOX_CATS = List[DB.BuiltInCategory](
     [DB.BuiltInCategory.OST_Cameras,
      DB.BuiltInCategory.OST_SectionBox])
@@ -15,14 +15,16 @@ CAM_AND_BOX_CATS = List[DB.BuiltInCategory](
 # Camera and Section Box only meaningful in 3D views.
 # In other views they are redundant.
 non_cam_and_box_filter = DB.ElementMulticategoryFilter(CAM_AND_BOX_CATS, True)
-collector = DB.FilteredElementCollector(doc, view_id)\
-    .WherePasses(non_cam_and_box_filter)\
+elems_in_view = list(
+    DB.FilteredElementCollector(doc, view_id)
+    .WherePasses(non_cam_and_box_filter)
     .WhereElementIsNotElementType()
+)
 
-if collector.GetElementCount() > MAX_APPLICABLE_ELEM_QTY:
+if len(elems_in_view) > MAX_APPLICABLE_ELEM_QTY:
     many_elems_msg = (
-        'Current view has more than {} geometry objects. '
-        'Which can take too long time and finally fail to select. \n\n'
+        'Current view has {} elements. '
+        'Which can take too long time or fail to select. \n\n'
         'Are you sure you want to proceed?'
     ).format(MAX_APPLICABLE_ELEM_QTY)
 
@@ -31,11 +33,11 @@ if collector.GetElementCount() > MAX_APPLICABLE_ELEM_QTY:
         script.exit()
 
 if doc.IsFamilyDocument is True:
-    to_select = collector.ToElementIds()
+    to_select = elems_in_view.ToElementIds()
 
 else:
     to_select = []
-    for elem in collector.ToElements():
+    for elem in elems_in_view:
         if hasattr(elem, 'Name') and elem.Name == "ExtentElem":
             pass
         else:
