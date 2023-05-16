@@ -1,6 +1,7 @@
 layout:
-  - Tools
+  - Settings
   - Toggles
   - Manage
   - Selection
   - View
+  - Utils
