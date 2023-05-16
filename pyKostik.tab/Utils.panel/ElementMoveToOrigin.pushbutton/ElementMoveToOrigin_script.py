@@ -85,7 +85,7 @@ if picked_elem:
     elif elem_moving_point.has_location_curve:
         elem_moving_point = elem_moving_point.get_location_curve_midpoint()
         logger.info(
-            'got middle of location line: {}'
+            'got middle of location curve: {}'
             .format(elem_moving_point)
         )
 
@@ -104,6 +104,7 @@ if picked_elem:
 
         if not ask_use_geom_center:
             agree_to_move = False
+            logger.info('user canceled')
 
 if agree_to_move:
     with revit.Transaction('Move to Origin'):
@@ -113,3 +114,4 @@ if agree_to_move:
             picked_elem.Id,
             transform
         )
+        logger.info('moved to origin')
