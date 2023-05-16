@@ -67,9 +67,11 @@ picked_elem = revit.pick_element('Select element to move')  # type: DB.Element
 agree_to_move = True
 
 if picked_elem:
+    logger.info('selected "{}"'.format(picked_elem))
 
     if hasattr(picked_elem, 'Host'):
         if getattr(picked_elem, 'Host') is not None:
+            logger.info('element is host based. exiting')
             forms.alert('Can not move host based elements', exitscript=True)
 
     elem_moving_point = ElementMovingPoint(picked_elem)
