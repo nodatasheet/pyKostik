@@ -560,7 +560,7 @@ cat_selection_groups = cat_groups.get_selection_groups()
 
 selected_cats = forms.SelectFromList.show(
     context=cat_selection_groups,
-    title='Select Category to hide',
+    title='Select Category to hide / unhide',
     multiselect=True,
     button_name='Select Categories',
     name_attr='name',
@@ -590,7 +590,7 @@ if selected_cats:
 
     selected_views = forms.SelectFromList.show(
         context=view_selection_groups.get_view_groups(),
-        title='Select Views where Category should be hidden',
+        title='Select Views where Category should be hidden / unhidden',
         multiselect=True,
         button_name='Select Views',
         name_attr='name',
@@ -611,7 +611,9 @@ if selected_views:
 if ask_hide_unhide:
     chosen_mode_txt = ask_hide_unhide
     chosen_mode_value = hiding_modes[chosen_mode_txt]
-    with revit.Transaction('Hide Categories'):
+    with revit.Transaction(
+        '{} Categories in Views'.format(chosen_mode_txt)
+    ):
         for view_item, cat_wrap in itertools.product(
                 selected_views, selected_cats):
             result = OutputResult(
@@ -624,16 +626,19 @@ if ask_hide_unhide:
                     cat_wrap,
                     chosen_mode_value
                 )
+                success_mark = ':white_heavy_check_mark:'
                 result.print_result(
-                    symbol=':white_heavy_check_mark:'
+                    symbol=success_mark
                 )
             except AttemptFailure as failed_attempt:
+                failure_mark = ':cross_mark:'
                 result.print_result(
-                    symbol=':cross_mark:',
+                    symbol=failure_mark,
                     fail_txt=str(failed_attempt)
                 )
             except UnexpectedAttemptFailure as failed_attempt:
+                warning_mark = ':warning:'
                 result.print_result(
-                    symbol=':warning:',
+                    symbol=warning_mark,
                     fail_txt=str(failed_attempt)
                 )
