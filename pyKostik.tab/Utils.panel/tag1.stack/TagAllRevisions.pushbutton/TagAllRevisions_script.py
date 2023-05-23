@@ -115,14 +115,6 @@ def get_geometry_instances(elem, geom_options):
     return geometry_instances
 
 
-def draw_curve(curve):
-    doc.Create.NewDetailCurve(active_view, curve)
-
-
-def get_circle(center):
-    return DB.Arc.Create(center, 1, 0, 2 * 3.14, DB.XYZ.BasisX, DB.XYZ.BasisY)
-
-
 rev_tag_type_id = DB.FilteredElementCollector(doc) \
     .OfCategory(DB.BuiltInCategory.OST_RevisionCloudTags) \
     .WhereElementIsElementType() \
