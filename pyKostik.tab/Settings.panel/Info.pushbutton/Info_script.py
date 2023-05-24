@@ -87,6 +87,7 @@ def get_origin_url(remotes):
     for remote in remotes:
         if remote.name == 'origin':
             return remote.url
+    return 'no url for local'
 
 
 def get_update_status(repo_info):
@@ -110,7 +111,7 @@ extension_url = get_origin_url(extension_remotes)
 update_status = get_update_status(extension_repo_info)
 
 output = script.get_output()
-output.print_md('Extension name: {}(branch-{})'.format(extension_name, extension_branch))
+output.print_md('Extension name: {} (branch-{})'.format(extension_name, extension_branch))
 output.print_md('Extension location: {}'.format(extension_path))
-output.print_md('Extension site: <{}>'.format(extension_url or 'no url for local'))
+output.print_md('Extension site: <{}>'.format(extension_url))
 output.print_md('Updates status: {}'.format(update_status))
