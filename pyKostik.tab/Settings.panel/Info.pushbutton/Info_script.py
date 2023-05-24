@@ -93,7 +93,7 @@ def get_update_status(repo_info):
     # type: (git.RepoInfo) -> str
     if updater.has_pending_updates(repo_info):
         return (
-            ':cross_mark: You are not using the latest version.<br>'
+            ':cross_mark: You are not using the latest version. '
             'follow this guide to to update:<br>'
             '<https://github.com/nodatasheet/pyKostik#update>'
         )
