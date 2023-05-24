@@ -86,6 +86,7 @@ def get_origin_url(remotes):
     # type: (list[RemoteRepository]) -> str
     for remote in remotes:
         if remote.name == 'origin':
+            print(remote.url)
             return remote.url
     return 'no url for local'
 
