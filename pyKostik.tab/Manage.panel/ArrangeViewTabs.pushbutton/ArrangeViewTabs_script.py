@@ -6,7 +6,7 @@ from pyrevit import script, revit, forms, DB, UI, HOST_APP
 
 try:
     # for type hinting
-    from typing import Iterable, Callable
+    from typing import Iterable
 except Exception:
     pass
 
@@ -295,7 +295,11 @@ def uiview_by_view(view):
 
 doc_wraps = []
 invalid_path_docs = []
+single_view_docs = []
 for active_doc in app.Documents:
+    views_in_doc = revit.query.get_all_views(active_doc)
+    if len(views_in_doc) < 2:
+        single_view_docs.append(active_doc)
     if not active_doc.PathName:
         invalid_path_docs.append(active_doc)
     elif not active_doc.IsLinked:
@@ -303,7 +307,19 @@ for active_doc in app.Documents:
             DocWrap(active_doc)
         )
 
+if single_view_docs:
+    # TODO: bypass with another option
+    forms.alert(
+        msg=('Some documents have only one view.\n\n'
+             'In order to arrange the view tabs, documents '
+             'must have at least two views.'),
+        expanded=('Documents with a single view:\n'
+                  + '\n'.join(str(d.Title) for d in single_view_docs)),
+        exitscript=True
+    )
+
 if invalid_path_docs:
+    # TODO: bypass with another option
     forms.alert(
         msg=('Some documents do not have a valid path.\n\n'
              'In order to arrange the view tabs, initial documents '
