@@ -4,11 +4,11 @@
     "type": "extension",
     "rocket_mode_compatible": "True",
     "name": "pyKostik",
-    "description": "A set of general tools for Revit",
+    "description": "Some general tools for Revit",
     "author": "Konstantin",
     "author_profile": "https://github.com/nodatasheet",
     "url": "https://github.com/nodatasheet/pyKostik.git",
     "website": "",
-    "image": "",
+    "image": "https://github.com/nodatasheet.png",
     "dependencies": []
 }
