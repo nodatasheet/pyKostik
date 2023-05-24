@@ -92,7 +92,11 @@ def get_origin_url(remotes):
 def get_update_status(repo_info):
     # type: (git.RepoInfo) -> str
     if updater.has_pending_updates(repo_info):
-        return ':cross_mark: You are not using the latest version.'
+        return (
+            ':cross_mark: You are not using the latest version. '
+            'Follow this guide to to update:<br>'
+            '<https://github.com/nodatasheet/pyKostik#update>'
+        )
     return ':white_heavy_check_mark: Congrats! You are up to date!'
 
 
@@ -105,11 +109,14 @@ extension_repo_info = get_repo_info(extension_repo_path)
 extension_remotes = get_remotes(extension_repo_info)
 
 extension_name = extension_repo_info.name
+extension_branch = extension_repo_info.branch
 extension_url = get_origin_url(extension_remotes)
 update_status = get_update_status(extension_repo_info)
 
 output = script.get_output()
-output.print_md('Extension name: {}'.format(extension_name))
+output.print_md(
+    'Extension name: {} (branch-{})'.format(extension_name, extension_branch)
+)
 output.print_md('Extension location: {}'.format(extension_path))
-output.print_md('Extension site: <{}>'.format(extension_url))
+output.print_md('Extension site : [{0}]({0})'.format(extension_url))
 output.print_md('Updates status: {}'.format(update_status))
