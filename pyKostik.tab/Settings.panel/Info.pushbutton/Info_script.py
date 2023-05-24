@@ -86,7 +86,6 @@ def get_origin_url(remotes):
     # type: (list[RemoteRepository]) -> str
     for remote in remotes:
         if remote.name == 'origin':
-            print(remote.url)
             return remote.url
 
 
@@ -113,5 +112,5 @@ update_status = get_update_status(extension_repo_info)
 output = script.get_output()
 output.print_md('Extension name: {} (branch-{})'.format(extension_name, extension_branch))
 output.print_md('Extension location: {}'.format(extension_path))
-print('Extension site: <{}>'.format(extension_url))
+output.print_md('Extension site: [{0}]({0})'.format(extension_url))
 output.print_md('Updates status: {}'.format(update_status))
