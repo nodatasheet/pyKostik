@@ -1,7 +1,7 @@
 {
     "builtin": "False",
-    "enabled": "True",
-    "type": "lib",
+    "default_enabled": "True",
+    "type": "extension",
     "rocket_mode_compatible": "True",
     "name": "pyKostik",
     "description": "A set of general tools for Revit",
