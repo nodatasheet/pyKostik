@@ -1,6 +1,6 @@
 # pyKostik
 Extension with some useful tools for [pyRevit](https://github.com/eirannejad/pyRevit)
-![general_tab_pic_1.png](media\images\general_tab_pic_1.png)
+![general_tab_pic_1.png](media/images/general_tab_pic_1.png)
 ### Requirements
 1. Installed [latest pyRevit release](https://github.com/eirannejad/pyRevit/releases/latest).
 1. Installed `pyRevit CLI` from the [latest pyRevit release](https://github.com/eirannejad/pyRevit/releases/latest) (needs admin rights).
