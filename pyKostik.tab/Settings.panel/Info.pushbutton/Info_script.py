@@ -94,7 +94,7 @@ def get_update_status(repo_info):
     if updater.has_pending_updates(repo_info):
         return (
             ':cross_mark: You are not using the latest version. '
-            'follow this guide to to update:<br>'
+            'Follow this guide to to update:<br>'
             '<https://github.com/nodatasheet/pyKostik#update>'
         )
     return ':white_heavy_check_mark: Congrats! You are up to date!'
@@ -119,5 +119,4 @@ output.print_md(
 )
 output.print_md('Extension location: {}'.format(extension_path))
 output.print_md('Extension site : [{0}]({0})'.format(extension_url))
-
 output.print_md('Updates status: {}'.format(update_status))
