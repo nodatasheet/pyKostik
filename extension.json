@@ -1,6 +1,6 @@
 {
     "builtin": "False",
-    "default_enabled": "True",
+    "enabled": "True",
     "type": "lib",
     "rocket_mode_compatible": "True",
     "name": "pyKostik",
