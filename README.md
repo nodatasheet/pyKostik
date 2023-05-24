@@ -31,5 +31,5 @@ Extension with some useful tools for [pyRevit](https://github.com/eirannejad/pyR
         ```
     - In PyRevit Tab on the bottom left press `Reload` button.
 ## Credits
-- All developers and contributors of [pyRevit](https://github.com/eirannejad/pyRevit)
+- All [contributors](https://github.com/eirannejad/pyRevit/graphs/contributors) of pyRevit
 - [Icons8](https://icons8.com/) for free icons
