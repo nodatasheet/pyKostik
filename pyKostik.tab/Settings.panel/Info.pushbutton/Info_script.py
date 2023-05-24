@@ -105,11 +105,12 @@ extension_repo_info = get_repo_info(extension_repo_path)
 extension_remotes = get_remotes(extension_repo_info)
 
 extension_name = extension_repo_info.name
+extension_branch = extension_repo_info.branch
 extension_url = get_origin_url(extension_remotes)
 update_status = get_update_status(extension_repo_info)
 
 output = script.get_output()
-output.print_md('Extension name: {}'.format(extension_name))
+output.print_md('Extension name: {}{}'.format(extension_name, extension_branch))
 output.print_md('Extension location: {}'.format(extension_path))
 output.print_md('Extension site: <{}>'.format(extension_url))
 output.print_md('Updates status: {}'.format(update_status))
