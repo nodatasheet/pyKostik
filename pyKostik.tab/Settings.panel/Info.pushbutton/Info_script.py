@@ -115,7 +115,8 @@ update_status = get_update_status(extension_repo_info)
 
 output = script.get_output()
 output.print_md(
-    'Extension name: {} (branch-{})'.format(extension_name, extension_branch))
+    'Extension name: {} (branch-{})'.format(extension_name, extension_branch)
+)
 output.print_md('Extension location: {}'.format(extension_path))
 output.print_md('Extension site: [{0}]({0})'.format(extension_url))
 output.print_md('Updates status: {}'.format(update_status))
