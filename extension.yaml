@@ -11,11 +11,12 @@ type: extension
 # all extensions types can define a list of dependencies
 # this is a list of other extensions, that this extension is dependent on
 dependencies:
+  []
 
 name: pyKostik
 description: A set of general tools for Revit
 author: Konstantin
 author_profile: https://github.com/nodatasheet
 url: https://github.com/nodatasheet/pyKostik.git
-website: 
-image: 
+website: N/A
+image: N/A
