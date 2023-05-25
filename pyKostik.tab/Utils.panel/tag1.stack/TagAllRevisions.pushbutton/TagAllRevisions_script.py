@@ -527,7 +527,6 @@ class TagWrap(object):
             tag_bb = view_wrap.element_bounding_box(new_tag)
             new_tag.TagHeadPosition = tag_bb.Max
             new_tag.HasLeader = True
-            raise Exception('test exception')
             return cls(new_tag)
         except Exception as err:
             raise AttemptFailure(err)
