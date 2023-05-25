@@ -9,6 +9,10 @@ doc = revit.doc  # type: DB.Document
 logger = script.get_logger()
 
 
+class AttemptFailure(Exception):
+    pass
+
+
 class ViewElementsCollector(object):
 
     def __init__(self, doc, view_wrap):
@@ -456,6 +460,10 @@ class ViewRevisionCloud(object):
         geom_opts.ComputeReferences = True
         return geom_opts
 
+    @property
+    def id(self):
+        return self._revision_cloud.Id
+
 
 class ViewRevisionSubCloud(object):
     """"Group of `RevisionCloudArc` connected together."""
@@ -502,23 +510,27 @@ class TagWrap(object):
     @classmethod
     def tag_sub_cloud(cls, tag_type_id, view_wrap, revision_sub_cloud):
         # type: (DB.ElementId, ViewWrap, ViewRevisionSubCloud) -> TagWrap
-        add_leader = False
-        top_right_arc = revision_sub_cloud.top_right_arc
+        try:
+            add_leader = False
+            top_right_arc = revision_sub_cloud.top_right_arc
 
-        new_tag = DB.IndependentTag.Create(
-            view_wrap.doc,
-            tag_type_id,
-            view_wrap.id,
-            top_right_arc.reference,
-            add_leader,
-            DB.TagOrientation.Horizontal,
-            top_right_arc.approx_outline.MaximumPoint
-        )  # type: DB.IndependentTag
+            new_tag = DB.IndependentTag.Create(
+                view_wrap.doc,
+                tag_type_id,
+                view_wrap.id,
+                top_right_arc.reference,
+                add_leader,
+                DB.TagOrientation.Horizontal,
+                top_right_arc.approx_outline.MaximumPoint
+            )  # type: DB.IndependentTag
 
-        tag_bb = view_wrap.element_bounding_box(new_tag)
-        new_tag.TagHeadPosition = tag_bb.Max
-        new_tag.HasLeader = True
-        return cls.__class__(new_tag)
+            tag_bb = view_wrap.element_bounding_box(new_tag)
+            new_tag.TagHeadPosition = tag_bb.Max
+            new_tag.HasLeader = True
+            raise Exception('test exception')
+            return cls(new_tag)
+        except Exception as err:
+            raise AttemptFailure(err)
 
     def make_leader_attached(self):
         self._tag.HasLeader = True
@@ -534,6 +546,46 @@ class TagWrap(object):
         return [
             self._tag.GetLeaderEnd(ref) for ref in tag_refs
         ]
+
+    @property
+    def id(self):
+        return self._tag.Id
+
+
+class OutputResult(object):
+    _output = None
+
+    def __init__(self, view_name, view_id, rev_cloud_id):
+        # type: (str, DB.ElementId, DB.ElementId, DB.ElementId) -> None
+        if self._output is None:
+            self._output = script.get_output()
+        self._general_txt = '{} (id {}) for cloud (id {}): '.format(
+            view_name,
+            self._output.linkify(view_id),
+            self._output.linkify(rev_cloud_id)
+        )
+
+    def print_result(self, symbol, tag_id=None, fail_txt=None):
+        # type: (str, DB.ElementId, str) -> None
+        if tag_id is not None:
+            tag_link = 'added tag (id {}) {}'.format(
+                self._output.linkify(tag_id),
+                symbol
+            )
+        else:
+            tag_link = ''
+
+        if fail_txt is None:
+            fail_txt = ''
+        else:
+            fail_txt = '{} failed to tag with error: {}'.format(
+                symbol,
+                fail_txt
+            )
+
+        result = self._general_txt + tag_link + fail_txt
+
+        self._output.print_md(result)
 
 
 def mark_tagged_sub_clouds(tag_wraps, sub_clouds):
@@ -607,6 +659,7 @@ selected_views = forms.SelectFromList.show(
     default_group=view_selection_groups.all_combined.name
 )  # type: list[ViewSelectionItem]
 
+
 if selected_views:
     with revit.TransactionGroup('Tag All Revision Clouds'):
         for view_item in selected_views:
@@ -630,8 +683,25 @@ if selected_views:
                 with revit.Transaction():
                     for sub_cloud in sub_clouds:
                         if not sub_cloud.is_tagged:
-                            TagWrap.tag_sub_cloud(
-                                tag_type_id=rev_tag_type_id,
-                                view_wrap=view_wrap,
-                                revision_sub_cloud=sub_cloud
+                            result = OutputResult(
+                                view_name=view_item.name,
+                                view_id=view_wrap.id,
+                                rev_cloud_id=cloud.id
                             )
+                            try:
+                                new_tag_wrap = TagWrap.tag_sub_cloud(
+                                    tag_type_id=rev_tag_type_id,
+                                    view_wrap=view_wrap,
+                                    revision_sub_cloud=sub_cloud
+                                )
+                                success_mark = ':white_heavy_check_mark:'
+                                result.print_result(
+                                    symbol=success_mark,
+                                    tag_id=new_tag_wrap.id
+                                )
+                            except AttemptFailure as err:
+                                failure_mark = ':cross_mark:'
+                                result.print_result(
+                                    symbol=failure_mark,
+                                    fail_txt=err
+                                )
