@@ -421,19 +421,28 @@ class ViewRevisionCloud(object):
         # type: (DB.RevisionCloud) -> None
         self._revision_cloud = revision_cloud
         self._doc = revision_cloud.Document
+        self._view_id = revision_cloud.OwnerViewId
 
     def existing_tag_wraps(self):
         # type: () -> list[TagWrap]
-        filter = DB.ElementCategoryFilter(
-            DB.BuiltInCategory.OST_RevisionCloudTags
-        )
+        and_filter = self._bic_rev_tags_filter()
         tag_wraps = []
-        for id in self._revision_cloud.GetDependentElements(filter):
+        for id in self._revision_cloud.GetDependentElements(and_filter):
             tag_wrap = TagWrap(
                 self._doc.GetElement(id)
             )
             tag_wraps.append(tag_wrap)
         return tag_wraps
+
+    def _bic_rev_tags_filter(self):
+        viis_on_view_filter = DB.VisibleInViewFilter(self._doc, self._view_id)
+        bic_rev_tags_filter = DB.ElementCategoryFilter(
+            DB.BuiltInCategory.OST_RevisionCloudTags
+        )
+        return DB.LogicalAndFilter(
+            viis_on_view_filter,
+            bic_rev_tags_filter
+        )
 
     def get_subclouds(self):
         geometric_arcs = self._get_geometric_arcs()
