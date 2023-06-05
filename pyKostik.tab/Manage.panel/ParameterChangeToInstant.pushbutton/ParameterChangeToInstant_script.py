@@ -1,3 +1,5 @@
+import traceback
+
 from System import Guid
 from System.Collections.Generic import List, ISet
 
@@ -327,6 +329,91 @@ class BoundParameter(object):
         return self._categories
 
 
+class FamilyEditor(object):
+    _family_doc = None  # type: DB.Document
+    _family_manager = None  # type: DB.FamilyManager
+    _family_param_wraps = None  # type: list[FamilyParameterWrap]
+
+    def __init__(self, family_wrap):
+        # type: (FamilyWrap) -> None
+        self._family_wrap = family_wrap
+        self._project_doc = family_wrap.family.Document
+
+    def enter_edit_mode(self):
+        # TODO: replace to __enter__
+        self._family_doc = \
+            self._project_doc.EditFamily(self._family_wrap.family)
+
+        logger.info(
+            'opened {} ({})'
+            .format(self._family_wrap.name, self._family_wrap.id)
+        )
+
+        self._family_manager = self._family_doc.FamilyManager
+        self._family_param_wraps = self._get_family_param_wraps()
+
+    def _get_family_param_wraps(self):
+        family_params = self._family_manager.Parameters
+
+        return list(
+            FamilyParameterWrap(param) for param in family_params
+        )
+
+    def try_changing_to_instance(self, param_wrap):
+        # type: (ParameterWrap) -> tuple[bool, str]
+        result_succeed = False
+        result_comment = 'parameter not found'
+
+        try:
+            matching_family_param = self._find_matching_param(param_wrap)
+            if matching_family_param is not None:
+                self._family_manager.MakeInstance(matching_family_param)
+                logger.info('changed parameter {}'.format(param_wrap.name))
+                result_succeed = True
+                result_comment = 'changed to instance'
+                return result_succeed, result_comment
+            logger.info('parameter {} not found'.format(param_wrap.name))
+            return result_succeed, result_comment
+
+        except Exception as err:
+            logger.info(
+                'failed changing parameter {}: {}'
+                .format(param_wrap.name, traceback.format_exc())
+            )
+            result_comment = str(err)
+            return result_succeed, result_comment
+
+    def _find_matching_param(self, param_wrap):
+        # type: (ParameterWrap) -> DB.FamilyParameter
+        logger.info('searching param matching to {}'.format(param_wrap.name))
+        for family_param_wrap in self._family_param_wraps:
+            if family_param_wrap.id_or_guid == param_wrap.id_or_guid:
+                logger.info(
+                    'found param with id={}'.format(param_wrap.id_or_guid)
+                )
+                return family_param_wrap.parameter
+
+    def load_back_to_project(self):
+        # type: () -> FamilyWrap
+        new_family = self._family_doc.LoadFamily(
+            self._project_doc,
+            FamilyLoadOptions()
+        )
+
+        new_family_wrap = FamilyWrap(new_family)
+
+        logger.info(
+            'loaded family back as {} ({})'
+            .format(new_family_wrap.name, new_family_wrap.id)
+        )
+
+        return new_family_wrap
+
+    def try_closing_family(self):
+        # type: () -> bool
+        return self._family_doc.Close(False)
+
+
 class BaseReportItem(object):
     _item = None
     _succeed = None
@@ -370,16 +457,36 @@ class ReportParameterItem(BaseReportItem):
 
 
 class ReportFamilyItem(BaseReportItem):
-    _params = []  # type: list[ReportParameterItem]
     _closed = False
 
     def __init__(self, family_selection_item):
         # type: (FamilySelectionItem) -> None
         self._item = family_selection_item
+        self._params = []  # type: list[ReportParameterItem]
 
     def add_report_param(self, report_parameter):
         # type: (ReportParameterItem) -> None
         self._params.append(report_parameter)
+
+    def update_status(self):
+        # type: () -> None
+        if self._succeed is None:
+            if self.all_params_succeed:
+                self._succeed = True
+                self.comment += '## All parameters changed'
+            else:
+                self._succeed = False
+                self.comment += '## Some parameters failed'
+
+        if not self.closed:
+            self._succeed = False
+            self._comment += (
+                '<br><br> Family was opened in background '
+                'and possibly not properly closed afterwards <br>'
+                'It is recommended editing it and closing manually. <br>'
+                'If too many families have same issue, '
+                'save your data and reload Revit.'
+            )
 
     @property
     def closed(self):
@@ -391,6 +498,10 @@ class ReportFamilyItem(BaseReportItem):
         self._closed = is_closd
 
     @property
+    def succeed(self):
+        return self._succeed
+
+    @property
     def item(self):
         return self._item
 
@@ -399,18 +510,22 @@ class ReportFamilyItem(BaseReportItem):
         return self._params
 
     @property
+    def any_param_succeed(self):
+        return any(param.succeed for param in self.parameters)
+
+    @property
     def all_params_succeed(self):
         return all(param.succeed for param in self.parameters)
 
 
-class ReportOutput(object):
+class ResultReport(object):
     _SUCCESS_SYMBOL = ':white_heavy_check_mark:'
     _FAILURE_SYMBOL = ':cross_mark:'
     _WARNING_SYMBOL = ':warning:'
-    _report_families = []  # type: list[ReportFamilyItem]
 
     def __init__(self):
         self._output = script.get_output()
+        self._report_families = []  # type: list[ReportFamilyItem]
 
     def add_family(self, report_family):
         # type: (ReportFamilyItem) -> None
@@ -418,24 +533,6 @@ class ReportOutput(object):
 
     def print_report(self):
         for family in self._report_families:
-            if family.all_params_succeed:
-                family.succeed = True
-            else:
-                family.succeed = False
-                family.comment = '- Some parameters failed'
-
-            if not family.closed:
-                family.succeed = False
-                family.comment += (
-                    '<br> - {} Possibly family was not properly closed '
-                    ' (even if not visible in opened documents). <br>'
-                    'It is recommended editing it and closing manually. <br>'
-                    'If too many families have same issue, '
-                    'undo this operation, save unsaved documents '
-                    'and reload Revit.'
-                    .format(self._WARNING_SYMBOL)
-                )
-
             self._print_family_report(family)
 
             for param in family.parameters:
@@ -444,28 +541,33 @@ class ReportOutput(object):
     def _print_family_report(self, family):
         # type: (ReportFamilyItem) -> None
         if family.succeed:
-            self._output.print_md(
-                '#{} {}'.format(self._SUCCESS_SYMBOL, family.item.name)
-            )
+            result_symbol = self._SUCCESS_SYMBOL
+
         else:
-            self._output.print_md(
-                '#{} {}'.format(self._FAILURE_SYMBOL, family.item.name)
-            )
+            result_symbol = self._FAILURE_SYMBOL
+
+        if not family.closed:
+            result_symbol = self._WARNING_SYMBOL
+
+        self._output.print_md(
+            '#{} {}'.format(result_symbol, family.item.name)
+        )
+
+        if not family.succeed:
             self._output.print_md(
                 '##{}'.format(family.comment)
             )
 
     def _print_param_report(self, param):
         # type: (ReportParameterItem) -> None
-        if param.succeed:
-            self._output.print_md(
-                '- {} {}'.format(self._SUCCESS_SYMBOL, param.item.name)
-            )
-        else:
-            self._output.print_md(
-                '- {} {}: {}'
-                .format(self._FAILURE_SYMBOL, param.item.name, param.comment)
-            )
+        result_symbol = self._SUCCESS_SYMBOL
+
+        if not param.succeed:
+            result_symbol = self._FAILURE_SYMBOL
+
+        print(
+            '{} {}: {}'.format(result_symbol, param.item.name, param.comment)
+        )
 
 
 def get_family(element):
@@ -624,7 +726,7 @@ if not selected_parameters:
 
 progress_total = len(selected_families)
 progress_count = 0
-report = ReportOutput()
+report = ResultReport()
 
 with forms.ProgressBar(cancellable=True) as progress_bar:
     progress_bar.title = 'Process Families'
@@ -638,57 +740,39 @@ with forms.ProgressBar(cancellable=True) as progress_bar:
                 output.close()
                 break
 
-            report_family = ReportFamilyItem(family_item)
             family_wrap = family_item.item
-            family = family_wrap.family
-            family_doc = project_doc.EditFamily(family)
-            family_manager = family_doc.FamilyManager
+            report_family = ReportFamilyItem(family_item)
+            family_editor = FamilyEditor(family_wrap)
+            family_editor.enter_edit_mode()
 
-            with revit.Transaction(doc=family_doc):
-                try:
-                    family_params = family_manager.Parameters
-                    updated_param_ids = []
-
+            try:
+                with revit.Transaction(doc=family_editor._family_doc):
                     for selected_param in selected_parameters:
-                        param_wrap = selected_param.item
-                        selected_param_id = param_wrap.id_or_guid
                         report_param = ReportParameterItem(selected_param)
+                        param_wrap = selected_param.item
 
-                        for family_param in family_params:
-                            family_param_wrap = FamilyParameterWrap(
-                                family_param)
-
-                            if selected_param_id == family_param_wrap.id_or_guid:
-                                family_manager.MakeInstance(family_param)
-                                updated_param_ids.append(param_wrap.id_or_guid)
-                                report_param.succeed = True
-
-                        if selected_param_id not in updated_param_ids:
-                            report_param.succeed = False
-                            report_param.comment = 'parameter not found'
+                        report_param.succeed, report_param.comment = \
+                            family_editor.try_changing_to_instance(param_wrap)
 
                         report_family.add_report_param(report_param)
 
-                    new_family = family_doc.LoadFamily(
-                        project_doc,
-                        FamilyLoadOptions()
-                    )
-                    new_family_wrap = FamilyWrap(new_family)
-                    logger.info(
-                        'loaded back as {} ({})'
-                        .format(new_family_wrap.name, new_family_wrap.id)
-                    )
+                if report_family.any_param_succeed:
+                    new_family_wrap = family_editor.load_back_to_project()
+                else:
+                    logger.info('no changed parameters, don\'t load back')
 
-                except Exception as err:
-                    failure_mark = ':cross_mark:'
-                    logger.info('fail')
-                    report_family.succeed = False
-                    report_family.comment = str(err)
+            except Exception as err:
+                logger.info(
+                    'failed editing family: {}'.format(traceback.format_exc())
+                )
+                report_family.succeed = False
+                report_family.comment = str(err)
 
-            report_family.closed = family_doc.Close(False)
+            report_family.closed = family_editor.try_closing_family()
+            report_family.update_status()
+            report.add_family(report_family)
 
             progress_count += 1
             progress_bar.update_progress(progress_count, progress_total)
-            report.add_family(report_family)
 
 report.print_report()
