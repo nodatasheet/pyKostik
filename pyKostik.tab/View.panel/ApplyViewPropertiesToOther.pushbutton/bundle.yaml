@@ -4,6 +4,7 @@ title: |-
 
 tooltip: |-
   Applies current view visibility properties to other views.
+
   If destination views have assigned templates,
   properties that controlled by the template
   will not b overwritten.
