@@ -5,6 +5,7 @@ active_view = HOST_APP.active_view
 
 views = forms.select_views(
     title='Select Views',
+    filterfunc=lambda v: v.Id != active_view.Id,
     multiple=True,
     button_name='Apply Visibility Properties to Views'
 )  # type: list[DB.View]
