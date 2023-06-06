@@ -1,0 +1,9 @@
+title: |-
+  Apply
+  View Properties
+
+tooltip: |-
+  Applies current view visibility properties to other views.
+  If destination views are controlled by a template,
+  parameters that controlled by the template
+  will not b overwritten.

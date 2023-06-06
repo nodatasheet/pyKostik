@@ -3,4 +3,5 @@ layout:
   - Crop Elevation
   - ViewToDrafting
   - ViewTitleAlignViewport
+  - ApplyViewPropertiesToOther
   - ToggleCategoryInView
