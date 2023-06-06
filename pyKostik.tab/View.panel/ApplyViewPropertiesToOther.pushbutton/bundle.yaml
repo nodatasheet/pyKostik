@@ -4,6 +4,6 @@ title: |-
 
 tooltip: |-
   Applies current view visibility properties to other views.
-  If destination views are controlled by a template,
+  If destination views have assigned templates,
   parameters that controlled by the template
   will not b overwritten.
