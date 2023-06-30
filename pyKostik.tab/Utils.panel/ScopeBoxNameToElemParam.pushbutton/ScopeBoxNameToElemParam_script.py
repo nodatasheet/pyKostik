@@ -469,7 +469,7 @@ class ScopeBoxReport(object):
         self._output.print_md('<br>')
         prefix = ':warning: ' if self.is_empty else ''
         self._output.print_md(
-            '## {}Scope Box "{}" intersected elements: '
+            '## {}Scope Box "{}" intersected elements processing: '
             '{} total, {} succeed, {} failed.'
             .format(
                 prefix,
@@ -571,14 +571,15 @@ class ScopeBoxWrap(object):
         # type: (DB.Element) -> None
         self._scope_box_elem = scope_box
         self._doc = scope_box.Document
+        self._intersec_elems = self._get_intersected_elems()
 
-    def get_intersected_elems(self):
-        intersec_elems_collector = self.get_collector()
-        return [IntersectedElement(elem) for elem in intersec_elems_collector]
+    def _get_intersected_elems(self):
+        collector = self._get_intersec_elems_collector()
+        return [IntersectedElement(elem) for elem in collector]
 
-    def get_collector(self):
-        outline = self.get_outline()
-        solid = self.get_solid()
+    def _get_intersec_elems_collector(self):
+        outline = self._get_outline()
+        solid = self._get_solid()
         bb_intersec_filter = DB.BoundingBoxIntersectsFilter(outline)
         solid_intersec_filter = DB.ElementIntersectsSolidFilter(solid)
 
@@ -590,13 +591,13 @@ class ScopeBoxWrap(object):
             .WherePasses(solid_intersec_filter)
         )
 
-    def get_outline(self):
+    def _get_outline(self):
         # type: () -> DB.Outline
         active_view = self._doc.ActiveView
         bb = self._scope_box_elem.get_BoundingBox(active_view)
         return DB.Outline(bb.Min, bb.Max)
 
-    def get_solid(self):
+    def _get_solid(self):
         geom_opts = DB.Options()
         scope_box_geom_elem = self._scope_box_elem.get_Geometry(geom_opts)
         scope_box_geom = ScopeBoxGeometry(scope_box_geom_elem)
@@ -605,6 +606,10 @@ class ScopeBoxWrap(object):
     @property
     def name(self):
         return str(self._scope_box_elem.Name)
+
+    @property
+    def intersected_elems(self):
+        return self._intersec_elems
 
 
 class FailureCatcher(DB.IFailuresPreprocessor):
@@ -671,22 +676,38 @@ class FailureCatchingTransaction():
 def set_param_and_prepare_report(scope_boxes, param_name, ids_to_skip=[]):
     # type: (list[ScopeBoxWrap], str, list[DB.ElementId]) -> Report
     report = Report(param_name)
+    past_intersec_elem_ids = set()
+
     for scope_box in scope_boxes:
         scope_box_report = ScopeBoxReport(scope_box.name)
-        intersected_elems = scope_box.get_intersected_elems()
-        for intersected_elem in intersected_elems:
-            elem_report = ElemetReport(intersected_elem)
+
+        for intersec_elem in scope_box.intersected_elems:
+            elem_report = ElemetReport(intersec_elem)
+
             try:
-                if intersected_elem.id in ids_to_skip:
+                intersec_elem_id = intersec_elem.id
+
+                if intersec_elem_id in ids_to_skip:
                     raise pke.FailedAttempt(
                         'Changing this parameter is forbidden'
                         ' outside of group edit mode'
                     )
-                intersected_elem.set_param_value(param_name, scope_box.name)
+
+                if intersec_elem_id in past_intersec_elem_ids:
+                    raise pke.FailedAttempt(
+                        'Element already intersecting another scope box. '
+                        'This scope box name will be skipped.'
+                    )
+
+                intersec_elem.set_param_value(param_name, scope_box.name)
+                past_intersec_elem_ids.add(intersec_elem_id)
+
             except Exception as err:
                 elem_report.error_msg = str(err)
+
             scope_box_report.add(elem_report)
         report.add(scope_box_report)
+
     return report
 
 
