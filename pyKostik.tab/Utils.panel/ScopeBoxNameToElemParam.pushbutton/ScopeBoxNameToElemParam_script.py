@@ -284,7 +284,7 @@ class IntersectedElement(object):
             raise pke.FailedAttempt('Parameter type is not text')
 
         set_attempt = param.Set(value)
-        if not set_attempt or param.AsString() != value:
+        if not set_attempt:
             raise pke.FailedAttempt('Failed setting parameter value')
 
     def _lookup_parameter(self, param_name):
