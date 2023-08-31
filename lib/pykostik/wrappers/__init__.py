@@ -1,0 +1,3 @@
+
+class BasePKObject(object):
+    pass
