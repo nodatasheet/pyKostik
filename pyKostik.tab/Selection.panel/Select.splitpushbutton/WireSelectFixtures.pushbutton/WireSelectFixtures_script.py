@@ -1,6 +1,5 @@
 """Selects elements that are connected to wires."""
 
-import pykostik as pk
 from pyrevit import revit, DB, forms
 from Autodesk.Revit.DB import Electrical as DBE
 
@@ -59,7 +58,6 @@ class WireWrap(object):
 class ConnectorWrap(object):
     def __init__(self, connector):
         # type: (DB.Connector) -> None
-        pk.validate_type(connector, DB.Connector)
         self.conn = connector
         self.owner = connector.Owner
         self.id = connector.Id
