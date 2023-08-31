@@ -4,3 +4,4 @@ layout:
   - AssemblySelectMembers
   - BeamSystemGetBeams
   - BeamGetBeamSystem
+  - WireSelectFixtures
