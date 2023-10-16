@@ -1,6 +1,7 @@
 layout:
   - SelectAllInView
   - GroupSelectMembers
+  - MemeberSelectParentGroup
   - AssemblySelectMembers
   - BeamSystemGetBeams
   - BeamGetBeamSystem
