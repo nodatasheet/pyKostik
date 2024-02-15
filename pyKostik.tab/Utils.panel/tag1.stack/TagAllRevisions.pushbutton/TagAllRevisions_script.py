@@ -29,12 +29,14 @@ class ViewElementsCollector(object):
         return untagged_revision_clouds
 
     def revision_clouds(self):
-        # type: () -> list[DB.RevisionCloud]
-        return list(
+        revision_clouds = (
             DB.FilteredElementCollector(self._doc, self._view_id)
             .OfCategory(DB.BuiltInCategory.OST_RevisionClouds)
             .WhereElementIsNotElementType()
         )
+        return [
+            ViewRevisionCloud(cloud) for cloud in revision_clouds if cloud
+        ]
 
     def tagged_revision_cloud_ids(self):
         # type: () -> set[DB.ElementId]
@@ -253,7 +255,7 @@ class ViewSelectionGroups(object):
     _ALL_COMBINED_GROUP_NAME = 'All Views'
 
     def __init__(self):
-        self._view_groups = {}  # type: dict[str: list[ViewSelectionItem]]
+        self._view_groups = {}  # type: dict[str, list[ViewSelectionItem]]
         self._make_all_combined_group()
 
     def _make_all_combined_group(self):
@@ -673,10 +675,7 @@ if selected_views:
         for view_item in selected_views:
             view_wrap = view_item.view_wrap
             view_collector = ViewElementsCollector(doc, view_wrap)
-            revision_clouds = view_collector.revision_clouds()
-            clouds = [
-                ViewRevisionCloud(cloud) for cloud in revision_clouds
-            ]
+            clouds = view_collector.revision_clouds()
 
             for cloud in clouds:
                 existing_tags = cloud.existing_tag_wraps()
