@@ -1,0 +1,4 @@
+
+
+class AbstractRevitObject(object):
+    pass
