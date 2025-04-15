@@ -1,6 +1,6 @@
 layout:
   - Legends
-  - Crop Elevation
+  - ElevationCropByBorders
   - ViewToDrafting
   - ViewTitleAlignViewport
   - ApplyViewPropertiesToOther
