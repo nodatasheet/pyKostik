@@ -1,0 +1,5 @@
+title: Save As
+tooltip: |- 
+  Opens "Save As" dialog for an active document.
+
+  Useful to assign a keyboard shortcut.

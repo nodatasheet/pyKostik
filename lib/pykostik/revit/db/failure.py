@@ -58,7 +58,7 @@ class SpecificFailureSwallower(prf.FailureSwallower):
                 mlogger.debug('\tseverity: %s', failure_severity)
                 mlogger.debug('\tdescription: %s', failure_desc)
                 mlogger.debug('\telements: %s',
-                              [x.IntegerValue for x in failure.GetFailingElementIds()])
+                              [str(x) for x in failure.GetFailingElementIds()])
                 mlogger.debug('\thas resolutions: %s', failure_has_res)
 
                 # attempt resolution

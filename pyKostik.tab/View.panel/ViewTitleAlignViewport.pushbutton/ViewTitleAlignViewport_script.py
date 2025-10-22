@@ -50,45 +50,39 @@ class UnitsConverter(object):
 def get_viewport_name(viewport):
     # type: (DB.Viewport) -> str
 
-    detail_num = get_param_as_str(viewport,
-                                  DB.BuiltInParameter.VIEWPORT_DETAIL_NUMBER)
+    BIP = DB.BuiltInParameter
 
-    title_on_sheet = get_param_as_str(viewport,
-                                      DB.BuiltInParameter.VIEW_DESCRIPTION)
+    detail_num = get_param_str_value(viewport, BIP.VIEWPORT_DETAIL_NUMBER)
+    title_on_sheet = get_param_str_value(viewport, BIP.VIEW_DESCRIPTION)
+
     if title_on_sheet:
         return '{}: {}'.format(detail_num, title_on_sheet)
 
-    view_name = get_param_as_str(viewport, DB.BuiltInParameter.VIEW_NAME)
+    view_name = get_param_str_value(viewport, BIP.VIEW_NAME)
     if view_name:
         return '{}: {}'.format(detail_num, view_name)
 
     return viewport.Name
 
 
-def get_param_as_str(elem, built_in_param):
+def get_param_str_value(elem, built_in_param):
+    # type: (DB.Element, DB.BuiltInParameter) -> str | None
     param = elem.get_Parameter(built_in_param)
     if param:
         return param.AsString()
 
 
-ask_align_all = forms.alert(
-    msg=('Align all viewport title-blocks in current sheet?\n\n'
-         'Click "No" if want to select specific viewports'),
-    yes=True,
-    no=True
-)
+ask_sheets = forms.select_sheets()
 
-if ask_align_all:
-    viewports = [doc.GetElement(id) for id in active_sheet.GetAllViewports()]
-else:
-    with forms.WarningBar(title='Select viewports'):
-        picked_elems = revit.pick_elements_by_category(
-            DB.BuiltInCategory.OST_Viewports
-        )
-        if picked_elems:
-            viewports = picked_elems
-        else:
-            script.exit()
+if ask_sheets is None:
+    script.exit()
+
+sheets = ask_sheets  # type: list[DB.ViewSheet]
+viewports = []  # type: list[DB.Viewport]
+
+for sheet in sheets:
+    vp_ids = list(sheet.GetAllViewports())
+    viewports.extend(doc.GetElement(vp_id) for vp_id in vp_ids)
 
 skipped_viewport_names = []
 unskipped_viewports = []

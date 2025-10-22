@@ -165,7 +165,7 @@ class ParameterWrap(object):
     @property
     def is_builtin(self):
         if not self.is_shared:
-            return self.id.IntegerValue < 0
+            return int(str(self.id)) < 0
         return False
 
 
@@ -200,7 +200,7 @@ class ParameterElementWrap(object):
     @property
     def is_builtin(self):
         if not self.is_shared:
-            return self.id.IntegerValue < 0
+            return int(str(self.id)) < 0
         return False
 
 
@@ -212,7 +212,7 @@ class ParameterSelectionItem(object):
 
     def _get_item_name(self):
         param_name = self._param_wrap.name
-        id_number = self._param_wrap.id.IntegerValue
+        id_number = str(self._param_wrap.id)
         suffix = ' <id={}>'.format(id_number)
         if self._param_wrap.is_shared:
             suffix = ' (Shared) <guid={}>'.format(self._param_wrap.guid)

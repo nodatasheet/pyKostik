@@ -1,4 +1,7 @@
-title: Crop Elevation By Border Elements
+title: |-
+  Crop Elevation
+  by Borders
+
 tooltip: >-
   Crops Elevation or Section View by the borders of specified elements.
   Using the closest border to the View origin.
@@ -6,4 +9,3 @@ tooltip: >-
 
   Shift-Click:
   Shows Crop Options window
-

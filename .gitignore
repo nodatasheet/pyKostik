@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# cli commands
+cli commands/
+
 # VSCode
 .vscode/
 
