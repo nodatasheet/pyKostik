@@ -1,0 +1,7 @@
+title: |-
+  Why Invisible
+
+tooltip: |-
+  Try to figure out why element is invisible in active view.
+
+  Select an element where you can see it (or by id via Manage -> Select by ID). Then open view where you can't see it and run this button.
